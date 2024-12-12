@@ -4,7 +4,7 @@ import { Todo } from '../models/todo.js'
 class todoController {
     constructor(){
         //hold todo objects in array
-        this.TODOS=[]
+        this.initTodos()
     } 
 
     async createTodo(req, res){
@@ -38,7 +38,7 @@ class todoController {
         res.json({tasks: this.TODOS})
     } 
 
-    updateTodo(req, res){
+    async updateTodo(req, res){
         //get id from url params
         const todoId = req.params.id
         //get the updated task name from req body like form data
@@ -52,16 +52,18 @@ class todoController {
             })
             throw new Error('Could not find todo!')
         } 
-    // if id is ok - update Todo
-    //for update create element with the same id and new task
-    //and save it in the same array element by this index
-    this.TODOS[todoIndex] = new Todo(this.TODOS[todoIndex].id, updatedTask)
-    res.json({
-        message: 'Updated todo',
-        updatedTask: this.TODOS[todoIndex]
-    })
+        // if id is ok - update Todo
+        //for update create element with the same id and new task
+        //and save it in the same array element by this index
+        this.TODOS[todoIndex] = new Todo(this.TODOS[todoIndex].id, updatedTask)
+        await fileManager.writeFile('./data/todos.json', this.TODOS)
+        res.json({
+            message: 'Updated todo',
+            updatedTask: this.TODOS[todoIndex]
+        })
     } 
-    deleteTodo(req, res) {
+
+    async deleteTodo(req, res) {
         const todoId = req.params.id
         const todoIndex = this.TODOS.findIndex((todo) => todo.id === todoId)
         if (todoIndex < 0) {
@@ -71,6 +73,7 @@ class todoController {
             throw new Error('Could not find todo!')
         }       
         const deletedTask = this.TODOS.splice(todoIndex, 1)
+        await fileManager.writeFile('./data/todos.json', this.TODOS)
         res.json({
             message: 'Deleted todo successfully',
             deletedTask: deletedTask[0]

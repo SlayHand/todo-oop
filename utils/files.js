@@ -16,7 +16,8 @@ class FileManager {
     async readFile(filename){
         try {
             //read content from file in text format
-            const fileContent = await fs.readFile(filename, utf8)
+            const fileContent = await fs.readFile(filename, 'utf8')
+            console.log(fileContent)
             //convert content from text tformat to data format
             const fileData = JSON.parse(fileContent)
             return fileData
