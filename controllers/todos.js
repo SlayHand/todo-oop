@@ -1,3 +1,4 @@
+import { fileManager } from '../utils/files.js'
 import { Todo } from '../models/todo.js'
 
 class todoController {
@@ -6,23 +7,37 @@ class todoController {
         this.TODOS=[]
     } 
 
-createTodo(req, res){
-    //get data from POST request
-    const task =req.body.task
-    //create new object via Todo model
-    //model constructor uses uniq id and taks name as parameter
-    const newTodo = new Todo(Math.random().toString(), task)
-    //add new todo to todos array
-    this.TODOS.push(newTodo)
-    //create a correct response
-    res.json({
-        message: 'create new todo object',
-        newTask: newTodo
-    })
+    async createTodo(req, res){
+        //get data from POST request
+        const task =req.body.task
+        //create new object via Todo model
+        //model constructor uses uniq id and taks name as parameter
+        const newTodo = new Todo(Math.random().toString(), task)
+        //add new todo to todos array
+        this.TODOS.push(newTodo)
+        //save data to file
+        await fileManager.writeFile('./data/todos.json', this.TODOS)
+        //create a correct response
+        res.json({
+            message: 'create new todo object',
+            newTask: newTodo
+        })
     }
+
+    async initTodos(){
+        const todosData = await fileManager.readFile('./data/todos.json')
+        //if data is ok - add file content to array
+        if(todosData !== null){
+            this.TODOS = todosData
+        } else {
+            this.TODOS = [] //if we do not get data from file create an empty array
+        } 
+    } 
+
     getTodos(req, res){
         res.json({tasks: this.TODOS})
     } 
+
     updateTodo(req, res){
         //get id from url params
         const todoId = req.params.id
